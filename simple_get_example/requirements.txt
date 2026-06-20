@@ -1,0 +1,4 @@
+Flask>=3.0.0,<4
+pact-python>=3.1.0,<4
+pytest
+requests
