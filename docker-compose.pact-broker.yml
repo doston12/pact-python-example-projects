@@ -1,0 +1,32 @@
+services:
+  pact-broker-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: pact_broker
+      POSTGRES_PASSWORD: pact_broker
+      POSTGRES_DB: pact_broker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pact_broker -d pact_broker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pact-broker-db:/var/lib/postgresql/data
+
+  pact-broker:
+    image: pactfoundation/pact-broker:2.137.0-pactbroker2.118.0
+    depends_on:
+      pact-broker-db:
+        condition: service_healthy
+    ports:
+      - "9292:9292"
+    environment:
+      PACT_BROKER_PORT: "9292"
+      PACT_BROKER_DATABASE_URL: postgres://pact_broker:pact_broker@pact-broker-db/pact_broker
+      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: "5"
+      PACT_BROKER_LOG_LEVEL: INFO
+      PACT_BROKER_SQL_LOG_LEVEL: WARN
+      PACT_BROKER_BASE_URL: http://localhost:9292
+
+volumes:
+  pact-broker-db:
