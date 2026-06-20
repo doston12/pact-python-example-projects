@@ -38,6 +38,7 @@ python3 -m pytest consumer provider -q
 The `run_consumer_test.py`, `run_provider_test.py`, and `run_test.py` files are helper scripts only. They mirror the JavaScript example's runner files and call pytest for you, but Pact does not require them.
 
 ```bash
-python3 -m run_consumer_test
-python3 -m run_provider_test
+cd ..
+python3 -m python_copy.run_consumer_test
+python3 -m python_copy.run_provider_test
 ```

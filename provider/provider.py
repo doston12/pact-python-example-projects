@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 
-from provider.data.orders import ORDERS
+from .data.orders import ORDERS
 
 
 DATA_STORE = ORDERS

@@ -14,9 +14,9 @@ from typing import Generator
 import pytest
 from pact import Pact, match
 
-from consumer.order import Order, OrderItem
-from consumer.order_client import fetch_orders
-from pact_config import CONSUMER_NAME, PACT_DIR, PROVIDER_NAME
+from .order import Order, OrderItem
+from .order_client import fetch_orders
+from ..pact_config import CONSUMER_NAME, PACT_DIR, PROVIDER_NAME
 
 
 ITEM_PROPERTIES = {
@@ -49,7 +49,7 @@ def test_will_receive_the_list_of_current_orders(pact: Pact) -> None:
     Steps:
     1. Define the response-object -- this is what consumer expects from provider API.
     2. Define the expected HTTP communication between consumer and provider.
-    3.
+    3. Generate pact contracr file
 
     """
 
@@ -87,7 +87,6 @@ def test_will_receive_the_list_of_current_orders(pact: Pact) -> None:
     # pact contract is defined now. It is not generated yet, we defined how the contract looks like.
     # We will generate it in the next step
 
-
     # When your application is running in production, you would call the provider API, get some data from it and
     # display it on your application. This is done via fetch_orders method -- so, it is an important method that you
     # use to get and display data from another system/application (the provider API). In next step, we make a call to
@@ -100,12 +99,16 @@ def test_will_receive_the_list_of_current_orders(pact: Pact) -> None:
     # response shape and expected http communication -- our pact mock server knows only about this, and nothing else.
     # if you send it 'POST /orders' request, it will return 500 error, because it was not told to expect this request.
 
-    # So, when we sent GET /orders request to pact mock server it returns the response we defined in the previous step.
-    # That response is fake, but it has the same shape that our consumer expects from the real provider API.
-    # Once fetch_orders received the fake HTTP response from pact mock server, it tries to parse the response into
-    # our consumer model: Order and OrderItem classes. So this last step proves two things:
+    # When we sent GET /orders request to pact mock server it returns the response we defined in the previous step.
+    # That response is fake(mock response), but it has the same shape that our consumer expects from the real
+    # provider API. Once fetch_orders received the fake HTTP response from pact mock server, it tries to parse the
+    # response into our consumer model: Order and OrderItem classes. So this last step proves two things:
     # 1. fetch_orders() made the HTTP request described in the Pact interaction: GET /orders
     # 2. fetch_orders() can parse the provider response shape into the objects our app uses
+
+    # The core idea here is to confirm that the consumer code can handle the response shape that the provider is
+    # expected to return. This is the essence of contract testing: ensuring that both sides of the interaction
+    # (consumer and provider) agree on the request and response formats.
 
     with pact.serve() as mock_server:
         assert fetch_orders(str(mock_server.url)) == [

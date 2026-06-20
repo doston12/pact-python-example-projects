@@ -15,8 +15,8 @@ from pathlib import Path
 from pact import Verifier
 from werkzeug.serving import make_server
 
-from pact_config import PACT_DIR, PROVIDER_NAME
-from provider.provider import create_app
+from ..pact_config import PACT_DIR, PROVIDER_NAME
+from .provider import create_app
 
 
 def test_should_validate_the_expectations_of_order_web() -> None:

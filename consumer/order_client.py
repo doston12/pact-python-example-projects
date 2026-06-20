@@ -2,7 +2,7 @@ import os
 
 import requests
 
-from consumer.order import Order
+from .order import Order
 
 
 HOSTNAME = "127.0.0.1"

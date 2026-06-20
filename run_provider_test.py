@@ -1,4 +1,4 @@
-from run_test import run_tests
+from .run_test import run_tests
 
 
 if __name__ == "__main__":

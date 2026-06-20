@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from pact_config import PACT_FILE
+from .pact_config import PACT_FILE
 
 
 def run_tests(test_type: str) -> int:
