@@ -6,7 +6,6 @@ True power of contract testing comes with provider verification. Remember that c
 On consumer side, pact acted as a mock server provider.
 Now, on provider side pact acts as a verifier (of the contract).
 
-
 """
 import os
 import threading
@@ -20,7 +19,10 @@ from .provider import create_app
 
 
 def test_should_validate_the_expectations_of_order_web() -> None:
-    # Find the generated pact contract file
+    # There are tools for sharing contracts between consumer and provider, suppose when the  provider is a different
+    # company you will need to setup pact broker to share the contract between consumer and provider.
+    # In this example, however, we don't touch contract sharing aspect but for the sake of simplicity will assume that
+    # contract is shared already with provider. So, we just load the contract from the local dir
     pact_url = os.environ.get("PACT_URL")
     pact_source = Path(pact_url) if pact_url else PACT_DIR
 
@@ -33,7 +35,7 @@ def test_should_validate_the_expectations_of_order_web() -> None:
     thread.start()
 
     try:
-        # Create a pact verifier and tell it:
+        # Create a pact verifier object and seed:
         # 1. Who is the provider (provider name) -- GettingStartedOrderApi
         # 2. Consumer-generated pact (contract) file -- ./pacts/GettingStartedOrderWeb-GettingStartedOrderApi.json
         # 3. Where is provider running (host and port) -- http://127.0.0.1:<random-port> -- 0 means get any free port

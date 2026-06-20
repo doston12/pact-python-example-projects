@@ -1,3 +1,5 @@
+# This is our simple provider application (API) -- it is flask app with a single GET /orders endpoint
+
 from flask import Flask, jsonify
 
 from .data.orders import ORDERS
