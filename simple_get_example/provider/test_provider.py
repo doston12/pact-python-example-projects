@@ -20,7 +20,9 @@ from .provider import create_app
 
 
 def test_should_validate_the_expectations_of_order_web() -> None:
-    # Find the generated pact contract file
+    # There are tools for sharing contracts between consumer and provider.
+    # For example, when the provider is a separate company, you can use Pact Broker to share the contract.
+    # This simple example skips contract sharing and loads the generated pact from the local directory.
     pact_url = os.environ.get("PACT_URL")
     pact_source = Path(pact_url) if pact_url else PACT_DIR
 
@@ -33,7 +35,7 @@ def test_should_validate_the_expectations_of_order_web() -> None:
     thread.start()
 
     try:
-        # Create a pact verifier and tell it:
+        # Create a pact verifier object and seed:
         # 1. Who is the provider (provider name) -- GettingStartedOrderApi
         # 2. Consumer-generated pact (contract) file -- ./pacts/GettingStartedOrderWeb-GettingStartedOrderApi.json
         # 3. Where is provider running (host and port) -- http://127.0.0.1:<random-port> -- 0 means get any free port

@@ -1,3 +1,5 @@
+"""Simple provider application with a single GET /orders endpoint."""
+
 from flask import Flask, jsonify
 
 from .data.orders import ORDERS
