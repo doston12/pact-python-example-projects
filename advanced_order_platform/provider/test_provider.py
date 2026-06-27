@@ -87,8 +87,15 @@ def test_should_validate_the_expectations_of_order_web() -> None:
         )
 
         if pact_broker_base_url:
+            broker_auth = {}
+            if os.environ.get("PACT_BROKER_TOKEN"):
+                broker_auth["token"] = os.environ["PACT_BROKER_TOKEN"]
+            elif os.environ.get("PACT_BROKER_USERNAME"):
+                broker_auth["username"] = os.environ["PACT_BROKER_USERNAME"]
+                broker_auth["password"] = os.environ.get("PACT_BROKER_PASSWORD")
+
             (
-                verifier.broker_source(pact_broker_base_url, selector=True)
+                verifier.broker_source(pact_broker_base_url, selector=True, **broker_auth)
                 .consumer_version(
                     consumer=CONSUMER_NAME,
                     branch=os.environ.get("PACT_CONSUMER_BRANCH", "main"),

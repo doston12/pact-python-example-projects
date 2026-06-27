@@ -1,0 +1,89 @@
+name: Advanced Order Platform Contracts
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "advanced_order_platform/**"
+      - ".github/workflows/advanced-order-platform-contracts.yml"
+  pull_request:
+    paths:
+      - "advanced_order_platform/**"
+      - ".github/workflows/advanced-order-platform-contracts.yml"
+  workflow_dispatch:
+
+jobs:
+  consumer:
+    name: Consumer pact tests
+    runs-on: ubuntu-latest
+    env:
+      PACT_BROKER_BASE_URL: ${{ secrets.PACT_BROKER_BASE_URL }}
+      PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+      PACT_BROKER_USERNAME: ${{ secrets.PACT_BROKER_USERNAME }}
+      PACT_BROKER_PASSWORD: ${{ secrets.PACT_BROKER_PASSWORD }}
+      PACT_CONSUMER_VERSION: ${{ github.sha }}
+      PACT_CONSUMER_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: advanced_order_platform/requirements.txt
+
+      - name: Install Python dependencies
+        run: python3 -m pip install -r advanced_order_platform/requirements.txt
+
+      - name: Run consumer pact tests
+        run: python3 -m pytest advanced_order_platform/consumer -q
+
+      - name: Upload generated pact
+        uses: actions/upload-artifact@v4
+        with:
+          name: advanced-order-platform-pacts
+          path: advanced_order_platform/pacts/*.json
+
+      - name: Install Pact CLI
+        if: github.event_name != 'pull_request'
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.sh | sh
+          echo "$HOME/.pact/bin" >> "$GITHUB_PATH"
+
+      - name: Publish pacts to Pact Broker
+        if: github.event_name != 'pull_request'
+        run: advanced_order_platform/scripts/publish_consumer_pacts.sh
+
+  provider:
+    name: Provider verification
+    runs-on: ubuntu-latest
+    needs: consumer
+    if: github.event_name != 'pull_request'
+    env:
+      PACT_BROKER_BASE_URL: ${{ secrets.PACT_BROKER_BASE_URL }}
+      PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+      PACT_BROKER_USERNAME: ${{ secrets.PACT_BROKER_USERNAME }}
+      PACT_BROKER_PASSWORD: ${{ secrets.PACT_BROKER_PASSWORD }}
+      PACT_CONSUMER_BRANCH: ${{ github.ref_name }}
+      PACT_PROVIDER_VERSION: ${{ github.sha }}
+      PACT_PROVIDER_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: advanced_order_platform/requirements.txt
+
+      - name: Install Python dependencies
+        run: python3 -m pip install -r advanced_order_platform/requirements.txt
+
+      - name: Verify provider and publish results
+        run: advanced_order_platform/scripts/verify_provider_from_broker.sh
